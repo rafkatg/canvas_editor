@@ -1,6 +1,7 @@
 import React, { useState, KeyboardEvent } from "react";
 import { Editor, EditorState, RichUtils, AtomicBlockUtils } from "draft-js";
 import "draft-js/dist/Draft.css";
+import { saveEditorStateToJson, loadEditorStateFromJson } from "./utils";
 
 interface TextEditorProps {
   editorState: EditorState;
@@ -49,6 +50,29 @@ const TextEditor: React.FC<TextEditorProps> = ({
     addElement("BUTTON", { label: "Click Me" });
   };
 
+  const saveToFile = () => {
+    const json = saveEditorStateToJson(editorState);
+    const blob = new Blob([json], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "editorState.json";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const loadFromFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const json = event.target?.result as string;
+        setEditorState(loadEditorStateFromJson(json));
+      };
+      reader.readAsText(file);
+    }
+  };
+
   return (
     <div
       style={{
@@ -63,6 +87,8 @@ const TextEditor: React.FC<TextEditorProps> = ({
         onKeyPress={onURLChange}
       />
       <button onClick={addButton}>Add Button</button>
+      <button onClick={saveToFile}>Save</button>
+      <input type="file" accept="application/json" onChange={loadFromFile} />
       <Editor
         editorState={editorState}
         handleKeyCommand={handleKeyCommand}
