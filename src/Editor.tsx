@@ -20,12 +20,12 @@ const TextEditor: React.FC<TextEditorProps> = ({
     return "not-handled";
   };
 
-  const addImage = (url: string) => {
+  const addElement = (type: string, data: any) => {
     const contentState = editorState.getCurrentContent();
     const contentStateWithEntity = contentState.createEntity(
-      "IMAGE",
+      type,
       "IMMUTABLE",
-      { src: url },
+      data,
     );
     const entityKey = contentStateWithEntity.getLastCreatedEntityKey();
     const newEditorState = EditorState.set(editorState, {
@@ -41,8 +41,12 @@ const TextEditor: React.FC<TextEditorProps> = ({
       const target = e.target as HTMLInputElement;
       const url = target.value;
       target.value = "";
-      addImage(url);
+      addElement("IMAGE", { src: url });
     }
+  };
+
+  const addButton = () => {
+    addElement("BUTTON", { label: "Click Me" });
   };
 
   return (
@@ -58,6 +62,7 @@ const TextEditor: React.FC<TextEditorProps> = ({
         placeholder="Enter image URL and press Enter"
         onKeyPress={onURLChange}
       />
+      <button onClick={addButton}>Add Button</button>
       <Editor
         editorState={editorState}
         handleKeyCommand={handleKeyCommand}
